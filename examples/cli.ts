@@ -1,9 +1,8 @@
 
 import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory, } from '../lib/index';
+
 (async () => {
 
-
-    // new MVSLightwallet()
     const db = await MetaverseLightwalletDatabaseMemory.create()
     const core = new MetaverseLightwalletCore(db)
 

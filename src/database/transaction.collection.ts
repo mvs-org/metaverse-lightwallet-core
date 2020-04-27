@@ -47,7 +47,6 @@ export type TransactionCollectionMethods = {
     latest$: () => BehaviorSubject<RxDocument<TransactionDocType, TransactionDocMethods> | null>
     clear: () => Promise<number>
     add: (this: TransactionCollection, serializedTransaction: string, height: number) => Promise<RxDocument<TransactionDocType, TransactionDocMethods>>
-    // [key: string]: (...args: any[]) => any | Promise<any> | Observable<any>
 }
 
 export const transactionCollectionMethods: TransactionCollectionMethods = {

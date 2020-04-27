@@ -58,9 +58,6 @@ export async function initAccountCollection(database: MetaverseLightwalletDataba
         methods: {},
         statics: accountCollectionMethods,
     })
-    // accountCollection.postCreate(data => {
-    //     console.log('new account:', data.name)
-    // })
     return accountCollection
 }
 
