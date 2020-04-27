@@ -93,25 +93,41 @@ export class MetaverseLightwalletCore {
     }
 
     private async init(database: MetaverseLightwalletDatabase) {
-        database.waitForLeadership().then(() => this.sync())
+        await database.waitForLeadership()
+        let accountSwitch = 0
+        database.accounts.activeAccount$()
+            .subscribe(async (account) => {
+                if (accountSwitch > 1) {
+                    this.resetTransactions()
+                }
+                if (account) {
+                    accountSwitch++
+                    await this.sync()
+                    this.syncInterval()
+                }
+            })
     }
 
-    private async sync() {
+    private syncInterval() {
         console.info('taking the lead')
         interval(5000)
             .subscribe(() => {
                 if (!this.active$.value) {
                     return
                 }
-                return Promise.all([
-                    this.syncHeight(),
-                    this.syncTransactions()
-                        .catch(error => {
-                            console.log(error)
-                            this.syncing$.next(false)
-                        }),
-                ])
+                this.sync()
             })
+    }
+
+    private async sync() {
+        return Promise.all([
+            this.syncHeight(),
+            this.syncTransactions()
+                .catch(error => {
+                    console.log(error)
+                    this.syncing$.next(false)
+                }),
+        ])
     }
 
     private async syncTransactions() {
@@ -127,7 +143,6 @@ export class MetaverseLightwalletCore {
         })
         while (this.active$.value && transactions.length) {
             lastHeight = transactions[0].height
-            console.log(lastHeight)
             await this.db.transactions.bulkInsert(transactions)
             transactions = await this.explorer.listAddressTransactions({
                 addresses,

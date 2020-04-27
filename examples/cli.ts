@@ -1,5 +1,6 @@
 
 import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory } from '../lib/index'
+import { throttleTime, filter } from 'rxjs/operators'
 
 (async () => {
 
@@ -13,13 +14,23 @@ import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory } from '..
 
     console.log('Database', core.getName())
 
+    db.transactions.latest$().pipe(
+        throttleTime(1000),
+    )
+        .subscribe(latestTx => {
+            if (latestTx) {
+                console.log('latest transaction height:', latestTx.height)
+            }
+        })
 
-    db.accounts.activeAccount$().subscribe((account) => {
-        console.log('active account:', account?.name)
-        db.transactions.find().remove()
-    })
+    db.accounts.activeAccount$()
+        .pipe(filter(account => !!account))
+        .subscribe((account) => {
+            console.log('active account:', account?.name)
+            db.transactions.find().remove()
+        })
 
-    // create account
+    // create account. (not active until private property is set)
     db.accounts.insert({
         name: 'cangr',
         protected: 'dfjalkdsjfaa',
@@ -36,7 +47,7 @@ import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory } from '..
         },
     })
 
-    // wait 5 seconds. then update the account to become active
+    // wait some time. then update the account to active it
     setTimeout(() => {
         db.accounts.findOne({ selector: { name: 'cangr' } }).update({
             $set: {
