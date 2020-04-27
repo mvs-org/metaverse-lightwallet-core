@@ -3,17 +3,17 @@ import { ATTACHMENT_TYPE, ScriptAttenuation } from 'metaverse-ts'
 export function assetSpendable(quantity: number, script: string, tx_height: number, current_height: number) {
     if (ScriptAttenuation.hasAttenuationModel(script)) {
         let model = ScriptAttenuation.getParameters(ScriptAttenuation.getAttenuationModel(script))
-        let locked = 0;
-        let step_target = model.LH;
+        let locked = 0
+        let step_target = model.LH
         switch (model.TYPE) {
             case 1:
                 for (let period = model.PN; period < model.UN; period++) {
                     if (period != model.PN)
-                        step_target += model.LP / model.UN;
+                        step_target += model.LP / model.UN
                     if (tx_height + step_target > current_height)
-                        locked += model.LQ / model.UN;
+                        locked += model.LQ / model.UN
                 }
-                return quantity - locked;
+                return quantity - locked
             case 2:
             case 3:
                 if (model.UC === undefined || model.UQ === undefined) {
@@ -21,42 +21,42 @@ export function assetSpendable(quantity: number, script: string, tx_height: numb
                 }
                 for (let period = model.PN; period < model.UC.length; period++) {
                     if (period != model.PN)
-                        step_target += model.UC[period];
+                        step_target += model.UC[period]
                     if (tx_height + step_target > current_height)
-                        locked += model.UQ[period];
+                        locked += model.UQ[period]
                 }
-                return quantity - locked;
+                return quantity - locked
             default:
                 throw Error('Unknown attenuation model type')
 
         }
     } else {
-        return quantity;
+        return quantity
     }
-};
+}
 
 export async function calculateUtxo(txs: any[], addresses: string[]) {
-    let list: any = {};
+    let list: any = {}
     await Promise.all(txs.map(tx => {
         return Promise.all([
             Promise.all(
                 tx.inputs.map((input: { previous_output: { hash: string, index: number } }) => {
-                    list[input.previous_output.hash + '-' + input.previous_output.index] = 'spent';
-                })
+                    list[input.previous_output.hash + '-' + input.previous_output.index] = 'spent'
+                }),
             ),
             Promise.all(
                 tx.outputs.map((output: any) => {
                     if (addresses.indexOf(output.address) !== -1 && list[tx.hash + '-' + output.index] !== 'spent') {
-                        output.locked_until = (output.locked_height_range) ? tx.height + output.locked_height_range : 0;
-                        delete output['locked_height_range'];
-                        output.hash = tx.hash;
-                        list[tx.hash + '-' + output.index] = output;
+                        output.locked_until = (output.locked_height_range) ? tx.height + output.locked_height_range : 0
+                        delete output['locked_height_range']
+                        output.hash = tx.hash
+                        list[tx.hash + '-' + output.index] = output
                     }
                     if (output.attenuation_model_param && output.attenuation_model_param.lock_period > 100000000) {
-                        list[tx.hash + '-' + output.index] = 'spent';
+                        list[tx.hash + '-' + output.index] = 'spent'
                     }
-                })
-            )
+                }),
+            ),
         ])
     }))
     return Object.values(list).filter(item => item !== 'spent')
@@ -90,15 +90,15 @@ export function calculateBalancesFromUtxo(utxo: any[], addresses: string[], heig
                             unconfirmed: 0,
                             frozen: 0,
                             decimals: output.attachment.decimals,
-                        };
-                    let available = assetSpendable(output.attachment.quantity, output.script, output.height, height);
+                        }
+                    let available = assetSpendable(output.attachment.quantity, output.script, output.height, height)
                     if (!output.confirmed) {
                         acc.MST[output.attachment.symbol].unconfirmed += available
                     } else {
                         acc.MST[output.attachment.symbol].available += available
                     }
-                    acc.MST[output.attachment.symbol].frozen += output.attachment.quantity - available;
-                    break;
+                    acc.MST[output.attachment.symbol].frozen += output.attachment.quantity - available
+                    break
                 case ATTACHMENT_TYPE.MIT:
                 case 'mit':
                     acc.MIT.push({
@@ -107,21 +107,21 @@ export function calculateBalancesFromUtxo(utxo: any[], addresses: string[], heig
                         content: output.attachment.content,
                         owner: output.attachment.to_did,
                         status: output.attachment.status,
-                    });
-                    break;
+                    })
+                    break
             }
             if (output.value) {
                 if (output.locked_until > height) {
-                    acc.ETP.frozen += output.value;
+                    acc.ETP.frozen += output.value
                 } else {
                     if (!output.confirmed) {
                         acc.ETP.unconfirmed = acc.ETP.unconfirmed ? acc.ETP.unconfirmed + output.value : output.value
                     } else {
-                        acc.ETP.available += output.value;
+                        acc.ETP.available += output.value
                     }
                 }
             }
         }
-        return acc;
-    }, init);
+        return acc
+    }, init)
 }

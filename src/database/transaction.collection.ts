@@ -1,8 +1,8 @@
-import { RxCollection, RxDocument, RxJsonSchema, } from 'rxdb'
+import { RxCollection, RxDocument, RxJsonSchema } from 'rxdb'
 import { Transaction } from '../../../metaverse-ts/lib'
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map, debounceTime, switchMap, } from 'rxjs/operators';
-import { MetaverseLightwalletDatabase } from './database';
+import { Observable, BehaviorSubject } from 'rxjs'
+import { map, debounceTime, switchMap } from 'rxjs/operators'
+import { MetaverseLightwalletDatabase } from './database'
 
 
 export interface TransactionDocType {
@@ -12,25 +12,6 @@ export interface TransactionDocType {
     outputs: any[]
     height: number
     lock_time?: number
-}
-
-export async function initTransactionCollection(database: MetaverseLightwalletDatabase): Promise<TransactionCollection> {
-    const transactionCollection = await database.collection<TransactionDocType, TransactionDocMethods, TransactionCollectionMethods>({
-        name: 'transactions',
-        schema: transactionSchema,
-        methods: {},
-        statics: transactionCollectionMethods,
-    })
-    // transactionCollection.postCreate(data=>{
-    //     console.log('new transaction:', data)
-    // })
-    // transactionCollection.preInsert(data => {
-    //     if (data.height < 0) {
-    //         data.height = 1000000
-    //     }
-    //     return data
-    // }, true)
-    return transactionCollection
 }
 
 export type TransactionDocMethods = {}
@@ -46,7 +27,17 @@ export type TransactionCollectionMethods = {
     latest: () => Promise<TransactionDocType | undefined>
     latest$: () => BehaviorSubject<RxDocument<TransactionDocType, TransactionDocMethods> | null>
     clear: () => Promise<number>
-    add: (this: TransactionCollection, serializedTransaction: string, height: number) => Promise<RxDocument<TransactionDocType, TransactionDocMethods>>
+    add: (this: TransactionCollection, serializedTransaction: string, height: number) => Promise<RxDocument<TransactionDocType, TransactionDocMethods>>,
+}
+
+export async function initTransactionCollection(database: MetaverseLightwalletDatabase): Promise<TransactionCollection> {
+    const transactionCollection = await database.collection<TransactionDocType, TransactionDocMethods, TransactionCollectionMethods>({
+        name: 'transactions',
+        schema: transactionSchema,
+        methods: {},
+        statics: transactionCollectionMethods,
+    })
+    return transactionCollection
 }
 
 export const transactionCollectionMethods: TransactionCollectionMethods = {
@@ -61,7 +52,7 @@ export const transactionCollectionMethods: TransactionCollectionMethods = {
         return this.$.pipe(
             debounceTime(debounce),
             switchMap(() => this.find().$.pipe(
-            ))
+            )),
         )
     },
     latest$: function (this: TransactionCollection) {
@@ -83,7 +74,7 @@ export const transactionCollectionMethods: TransactionCollectionMethods = {
             outputs: transaction.outputs,
             inputs: transaction.inputs,
         })
-    }
+    },
 }
 
 export const transactionSchema: RxJsonSchema<TransactionDocType> = {

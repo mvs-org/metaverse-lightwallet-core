@@ -1,5 +1,5 @@
 
-import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory, } from '../lib/index';
+import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory } from '../lib/index'
 
 (async () => {
 
@@ -25,15 +25,15 @@ import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory, } from '.
         protected: 'dfjalkdsjfaa',
         addresses: [{
             a: 'abc',
-            path: 'm/0'
+            path: 'm/0',
         }, {
             a: 'MQWyTasDiEsAUqHy6fHuvzA2vozcVCVizQ',
             // a: 'MSCHL3unfVqzsZbRVCJ3yVp7RgAmXiuGN3',
-            path: 'm/1'
+            path: 'm/1',
         }],
         config: {
             index: 10,
-        }
+        },
     })
 
     // wait 5 seconds. then update the account to become active
@@ -46,8 +46,8 @@ import { MetaverseLightwalletCore, MetaverseLightwalletDatabaseMemory, } from '.
                     xpriv: 'xpriv348230984082304234',
                     algo: 'none',
                     multisig: [],
-                }
-            }
+                },
+            },
         })
     }, 1000)
 

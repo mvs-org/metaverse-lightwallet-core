@@ -1,4 +1,4 @@
-import { Balances } from './interfaces/balance.interface';
+import { Balances } from './interfaces/balance.interface'
 
 export const defaultBalances: Balances = {
     ETP: { frozen: 0, available: 0, decimals: 8 },

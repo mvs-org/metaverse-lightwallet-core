@@ -1,12 +1,12 @@
-import { MetaverseExplorer } from './explorer';
-import { flatMap, take, switchMap, debounceTime, map, filter, } from 'rxjs/operators';
-import { BehaviorSubject, interval, Observable, combineLatest, of, } from 'rxjs'
-import { MetaverseLightwalletDatabase, } from './database/database';
-import { RxDumpDatabaseAny, CollectionsOfDatabase } from 'rxdb';
+import { MetaverseExplorer } from './explorer'
+import { flatMap, take, switchMap, debounceTime, filter } from 'rxjs/operators'
+import { BehaviorSubject, interval, Observable, combineLatest, of } from 'rxjs'
+import { MetaverseLightwalletDatabase } from './database/database'
+import { RxDumpDatabaseAny, CollectionsOfDatabase } from 'rxdb'
 import { merge } from 'lodash'
-import { Balances } from './interfaces/balance.interface';
-import { defaultBalances } from './defaults';
-import { calculateUtxo, calculateBalancesFromUtxo } from './helpers/utxo.helper';
+import { Balances } from './interfaces/balance.interface'
+import { defaultBalances } from './defaults'
+import { calculateUtxo, calculateBalancesFromUtxo } from './helpers/utxo.helper'
 
 export class MetaverseLightwalletCore {
 
@@ -20,7 +20,7 @@ export class MetaverseLightwalletCore {
     constructor(
         public db: MetaverseLightwalletDatabase,
         private defaults: { balances?: Balances } = {},
-        private explorer = new MetaverseExplorer()
+        private explorer = new MetaverseExplorer(),
     ) {
         this.defaults.balances = this.defaults.balances ?? defaultBalances
         this.init(db)
@@ -32,7 +32,7 @@ export class MetaverseLightwalletCore {
             addresses$,
         ])
             .pipe(
-                flatMap(([transactions, addresses]) => calculateUtxo(transactions, addresses))
+                flatMap(([transactions, addresses]) => calculateUtxo(transactions, addresses)),
             )
     }
 
@@ -43,7 +43,7 @@ export class MetaverseLightwalletCore {
     ])
         .pipe(
             debounceTime(debounce),
-            switchMap(([utxos, addresses, currentHeight]: any) => {
+            switchMap(([utxos, addresses, currentHeight]: [any[], string[], number]) => {
                 const defaultBalances = JSON.parse(JSON.stringify(this.defaults.balances))
                 return of(merge(defaultBalances, calculateBalancesFromUtxo(utxos, addresses, currentHeight, defaultBalances, min_confirnations)))
             }),
@@ -109,7 +109,7 @@ export class MetaverseLightwalletCore {
                         .catch(error => {
                             console.log(error)
                             this.syncing$.next(false)
-                        })
+                        }),
                 ])
             })
     }
