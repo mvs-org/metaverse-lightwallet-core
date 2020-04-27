@@ -94,6 +94,7 @@ export class MetaverseLightwalletCore {
 
     private async init(database: MetaverseLightwalletDatabase) {
         await database.waitForLeadership()
+        console.info('taking the lead')
         let accountSwitch = 0
         database.accounts.activeAccount$()
             .subscribe(async (account) => {
@@ -109,7 +110,6 @@ export class MetaverseLightwalletCore {
     }
 
     private syncInterval() {
-        console.info('taking the lead')
         interval(5000)
             .subscribe(() => {
                 if (!this.active$.value) {
