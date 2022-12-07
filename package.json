@@ -14,7 +14,7 @@
     "metaverse-ts": "^0.1.0",
     "pouchdb-adapter-idb": "^7.2.1",
     "pouchdb-adapter-memory": "^7.2.1",
-    "rxdb": "^9.0.0-beta.8",
+    "rxdb": "^13.13.7",
     "rxjs": "^6.5.5",
     "superagent": "^5.2.2"
   },
